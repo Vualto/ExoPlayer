@@ -24,6 +24,7 @@ import static com.google.android.exoplayer2.demo.PlayerActivity.DRM_SCHEME_EXTRA
 import static com.google.android.exoplayer2.demo.PlayerActivity.DRM_SCHEME_UUID_EXTRA;
 import static com.google.android.exoplayer2.demo.PlayerActivity.EXTENSION_EXTRA;
 import static com.google.android.exoplayer2.demo.PlayerActivity.IS_LIVE_EXTRA;
+import static com.google.android.exoplayer2.demo.PlayerActivity.IS_VUDRM_EXTRA;
 import static com.google.android.exoplayer2.demo.PlayerActivity.SUBTITLE_LANGUAGE_EXTRA;
 import static com.google.android.exoplayer2.demo.PlayerActivity.SUBTITLE_MIME_TYPE_EXTRA;
 import static com.google.android.exoplayer2.demo.PlayerActivity.SUBTITLE_URI_EXTRA;
@@ -149,27 +150,33 @@ import java.util.UUID;
           intent.getStringArrayExtra(DRM_KEY_REQUEST_PROPERTIES_EXTRA + extrasKeySuffix);
       boolean drmMultiSession =
           intent.getBooleanExtra(DRM_MULTI_SESSION_EXTRA + extrasKeySuffix, false);
-      return new DrmInfo(drmScheme, drmLicenseUrl, keyRequestPropertiesArray, drmMultiSession);
+      boolean isVudrm =
+          intent.getBooleanExtra(IS_VUDRM_EXTRA + extrasKeySuffix, /* defaultValue= */ false);
+      return new DrmInfo(drmScheme, drmLicenseUrl, keyRequestPropertiesArray, drmMultiSession, isVudrm);
     }
 
     public final UUID drmScheme;
     public final String drmLicenseUrl;
     public final String[] drmKeyRequestProperties;
     public final boolean drmMultiSession;
+    public final boolean isVudrm;
 
     public DrmInfo(
         UUID drmScheme,
         String drmLicenseUrl,
         String[] drmKeyRequestProperties,
-        boolean drmMultiSession) {
+        boolean drmMultiSession,
+        boolean isVudrm) {
       this.drmScheme = drmScheme;
       this.drmLicenseUrl = drmLicenseUrl;
       this.drmKeyRequestProperties = drmKeyRequestProperties;
       this.drmMultiSession = drmMultiSession;
+      this.isVudrm = isVudrm;
     }
 
     public void addToIntent(Intent intent, String extrasKeySuffix) {
       Assertions.checkNotNull(intent);
+      intent.putExtra(IS_VUDRM_EXTRA + extrasKeySuffix, isVudrm);
       intent.putExtra(DRM_SCHEME_EXTRA + extrasKeySuffix, drmScheme.toString());
       intent.putExtra(DRM_LICENSE_URL_EXTRA + extrasKeySuffix, drmLicenseUrl);
       intent.putExtra(DRM_KEY_REQUEST_PROPERTIES_EXTRA + extrasKeySuffix, drmKeyRequestProperties);

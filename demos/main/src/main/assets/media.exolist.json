@@ -1,5 +1,27 @@
 [
   {
+    "name": "Vualto",
+    "samples": [
+      {
+        "name": "Tomorrowland Clear",
+        "uri": "https://d1chyo78gdexn4.cloudfront.net/vualto-demo/tomorrowland2015/tomorrowland2015_nodrm.ism/manifest.mpd"
+      },
+      {
+        "name": "Tomorrowland Widevine (SDK)",
+        "uri": "https://d1chyo78gdexn4.cloudfront.net/vualto-demo/tomorrowland2015/tomorrowland2015.ism/manifest.mpd",
+        "is_vudrm": true,
+        "drm_scheme": "widevine",
+        "drm_license_url": "https://widevine-license.vudrm.tech/proxy"
+      },
+      {
+        "name": "Tomorrowland Widevine (PROXY)",
+        "uri": "https://d1chyo78gdexn4.cloudfront.net/vualto-demo/tomorrowland2015/tomorrowland2015.ism/manifest.mpd",
+        "drm_scheme": "widevine",
+        "drm_license_url": "https://drmproxy.eu-central-1.vudrm.tech/v1/vualto-demo/widevine/proxy"
+      }
+    ]
+  },
+  {
     "name": "YouTube DASH",
     "samples": [
       {

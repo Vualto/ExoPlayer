@@ -83,13 +83,20 @@ import java.lang.reflect.Constructor;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.net.URL;
+
+import com.vualto.vudrm.HttpKidSource;
+import com.vualto.vudrm.widevine.AssetConfiguration;
+import com.vualto.vudrm.widevine.WidevineCallback;
 
 /** An activity that plays media using {@link SimpleExoPlayer}. */
 public class PlayerActivity extends AppCompatActivity
     implements OnClickListener, PlaybackPreparer, PlayerControlView.VisibilityListener {
 
-  // Activity extras.
+  // VUDRM TOKEN
+  public static final String VUDRM_TOKEN = "vualto-demo|2020-09-02T14:15:40Z|RAQrLiTYv+Z8U9LrxO0JDw==|363e3fa124c0c3a6d8019532c74e02b30190ca73";
 
+  // Activity extras.
   public static final String SPHERICAL_STEREO_MODE_EXTRA = "spherical_stereo_mode";
   public static final String SPHERICAL_STEREO_MODE_MONO = "mono";
   public static final String SPHERICAL_STEREO_MODE_TOP_BOTTOM = "top_bottom";
@@ -112,6 +119,7 @@ public class PlayerActivity extends AppCompatActivity
   public static final String URI_EXTRA = "uri";
   public static final String EXTENSION_EXTRA = "extension";
   public static final String IS_LIVE_EXTRA = "is_live";
+  public static final String IS_VUDRM_EXTRA = "is_vudrm";
 
   public static final String DRM_SCHEME_EXTRA = "drm_scheme";
   public static final String DRM_LICENSE_URL_EXTRA = "drm_license_url";
@@ -488,13 +496,27 @@ public class PlayerActivity extends AppCompatActivity
     } else if (!FrameworkMediaDrm.isCryptoSchemeSupported(drmInfo.drmScheme)) {
       errorStringId = R.string.error_drm_unsupported_scheme;
     } else {
-      MediaDrmCallback mediaDrmCallback =
-          createMediaDrmCallback(drmInfo.drmLicenseUrl, drmInfo.drmKeyRequestProperties);
-      drmSessionManager =
-          new DefaultDrmSessionManager.Builder()
-              .setUuidAndExoMediaDrmProvider(drmInfo.drmScheme, FrameworkMediaDrm.DEFAULT_PROVIDER)
-              .setMultiSession(drmInfo.drmMultiSession)
-              .build(mediaDrmCallback);
+      MediaDrmCallback mediaDrmCallback = null;
+      if (drmInfo.isVudrm) {
+        AssetConfiguration assetConfiguration = null;
+        try {
+          assetConfiguration = new AssetConfiguration.Builder()
+              .tokenWith(VUDRM_TOKEN)
+              .kidProviderWith(
+                  new HttpKidSource(new URL(parameters.uri.toString()))
+              ).build();
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+        mediaDrmCallback = new WidevineCallback(assetConfiguration);
+      } else {
+        mediaDrmCallback =
+            createMediaDrmCallback(drmInfo.drmLicenseUrl, drmInfo.drmKeyRequestProperties);
+      }
+      drmSessionManager = new DefaultDrmSessionManager.Builder()
+          .setUuidAndExoMediaDrmProvider(drmInfo.drmScheme, FrameworkMediaDrm.DEFAULT_PROVIDER)
+          .setMultiSession(drmInfo.drmMultiSession)
+          .build(mediaDrmCallback);
     }
 
     if (drmSessionManager == null) {
