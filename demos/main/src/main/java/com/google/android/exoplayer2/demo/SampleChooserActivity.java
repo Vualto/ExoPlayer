@@ -347,6 +347,7 @@ public class SampleChooserActivity extends AppCompatActivity
       Uri subtitleUri = null;
       String subtitleMimeType = null;
       String subtitleLanguage = null;
+      boolean isVudrm = false;
 
       reader.beginObject();
       while (reader.hasNext()) {
@@ -366,6 +367,9 @@ public class SampleChooserActivity extends AppCompatActivity
             break;
           case "is_live":
             isLive = reader.nextBoolean();
+            break;
+          case "is_vudrm":
+            isVudrm = reader.nextBoolean();
             break;
           case "drm_license_url":
             drmLicenseUrl = reader.nextString();
@@ -421,7 +425,8 @@ public class SampleChooserActivity extends AppCompatActivity
                   Util.getDrmUuid(drmScheme),
                   drmLicenseUrl,
                   drmKeyRequestProperties,
-                  drmMultiSession);
+                  drmMultiSession,
+                  isVudrm);
       Sample.SubtitleInfo subtitleInfo =
           subtitleUri == null
               ? null
