@@ -39,7 +39,6 @@ public class VudrmHelper {
 
   // Checks for vudrm.tech or drm.technology presence in the license URL
   public static Boolean useSdk(Uri uri) {
-    String dns = uri.getAuthority();
     String q = uri.getQuery();
 
     if (q == null) {
