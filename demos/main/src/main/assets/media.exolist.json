@@ -1,5 +1,16 @@
 [
   {
+    "name": "Vualto",
+    "samples": [
+      {
+        "name": "Tomorrowland2015 10s",
+        "uri": "https://origin.cluster.controlhub.dev.vualto.com/remote/wvtest/manifest.ism/manifest.mpd?mpd_inline_drm",
+        "drm_scheme": "widevine",
+        "drm_license_uri": "https://widevine-license.vudrm.tech/proxy"
+      }
+    ]
+  },
+  {
     "name": "YouTube DASH",
     "samples": [
       {

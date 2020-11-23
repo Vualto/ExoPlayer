@@ -30,9 +30,12 @@ import androidx.fragment.app.FragmentManager;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.RenderersFactory;
+import com.google.android.exoplayer2.demo.vudrm.VudrmHelper;
+import com.google.android.exoplayer2.drm.DefaultDrmSessionManager;
 import com.google.android.exoplayer2.drm.DrmInitData;
 import com.google.android.exoplayer2.drm.DrmSession;
 import com.google.android.exoplayer2.drm.DrmSessionEventListener;
+import com.google.android.exoplayer2.drm.DrmSessionManager;
 import com.google.android.exoplayer2.drm.OfflineLicenseHelper;
 import com.google.android.exoplayer2.offline.Download;
 import com.google.android.exoplayer2.offline.DownloadCursor;
@@ -44,6 +47,7 @@ import com.google.android.exoplayer2.offline.DownloadRequest;
 import com.google.android.exoplayer2.offline.DownloadService;
 import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
+import com.google.android.exoplayer2.source.dash.manifest.DashManifest;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector.MappedTrackInfo;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
@@ -220,14 +224,37 @@ public class DownloadTracker {
                 + " supported");
         return;
       }
-      widevineOfflineLicenseFetchTask =
-          new WidevineOfflineLicenseFetchTask(
-              format,
-              mediaItem.playbackProperties.drmConfiguration.licenseUri,
-              httpDataSourceFactory,
-              /* dialogHelper= */ this,
-              helper);
-      widevineOfflineLicenseFetchTask.execute();
+
+      Uri licenseUri = mediaItem.playbackProperties.drmConfiguration.licenseUri;
+
+      if ( VudrmHelper.isVudrm(licenseUri) ) {
+        try {
+          if (VudrmHelper.USE_SDK) {
+            // example using VUALTO Widevine SDK
+            DrmSessionManager drmSessionManager = VudrmHelper.getVudrmSessionManager(
+                mediaItem.playbackProperties.uri.toString(), /* should per asset */ VudrmHelper.TOKEN);
+
+            new WidevineOfflineLicenseFetchTask(
+                format,
+                httpDataSourceFactory,
+                /* dialogHelper= */ this,
+                helper,
+                drmSessionManager).execute();
+            return;
+          }
+
+          // else leverage to ExoPlayer DEMO Implementation
+          licenseUri = VudrmHelper.buildVudrmLicenseUri(licenseUri);
+        } catch (Exception e) {
+          Toast.makeText(context, "error setting VUDRM callbacks" + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+      }
+      new WidevineOfflineLicenseFetchTask(
+          format,
+          mediaItem.playbackProperties.drmConfiguration.licenseUri,
+          httpDataSourceFactory,
+          /* dialogHelper= */ this,
+          helper).execute();
     }
 
     @Override
@@ -373,13 +400,37 @@ public class DownloadTracker {
   private static final class WidevineOfflineLicenseFetchTask extends AsyncTask<Void, Void, Void> {
 
     private final Format format;
-    private final Uri licenseUri;
+    /* REMOVED (vudrm example)
+
+      private final Uri licenseUri;
+
+      end REMOVED */
     private final HttpDataSource.Factory httpDataSourceFactory;
     private final StartDownloadDialogHelper dialogHelper;
     private final DownloadHelper downloadHelper;
 
     @Nullable private byte[] keySetId;
     @Nullable private DrmSession.DrmSessionException drmSessionException;
+
+    /* ADDED (vudrm example) */
+
+    @Nullable private DrmSessionManager drmSessionManager;
+    @Nullable private Uri licenseUri;
+
+    public WidevineOfflineLicenseFetchTask(
+        Format format,
+        HttpDataSource.Factory httpDataSourceFactory,
+        StartDownloadDialogHelper dialogHelper,
+        DownloadHelper downloadHelper,
+        DrmSessionManager drmSessionManager) {
+      this.format = format;
+      this.httpDataSourceFactory = httpDataSourceFactory;
+      this.dialogHelper = dialogHelper;
+      this.downloadHelper = downloadHelper;
+      this.drmSessionManager = drmSessionManager;
+    }
+
+    /* end ADDED */
 
     public WidevineOfflineLicenseFetchTask(
         Format format,
@@ -396,11 +447,34 @@ public class DownloadTracker {
 
     @Override
     protected Void doInBackground(Void... voids) {
-      OfflineLicenseHelper offlineLicenseHelper =
-          OfflineLicenseHelper.newWidevineInstance(
-              licenseUri.toString(),
-              httpDataSourceFactory,
-              new DrmSessionEventListener.EventDispatcher());
+      /* REMOVED (vudrm example)
+
+      OfflineLicenseHelper = OfflineLicenseHelper.newWidevineInstance(
+          licenseUri.toString(),
+          httpDataSourceFactory,
+          new DrmSessionEventListener.EventDispatcher());
+
+      end REMOVED */
+
+      /* ADDED (vudrm example) */
+
+      OfflineLicenseHelper offlineLicenseHelper;
+
+      if ( this.drmSessionManager != null ) {
+        offlineLicenseHelper =
+            new OfflineLicenseHelper(
+                (DefaultDrmSessionManager) this.drmSessionManager,
+                new DrmSessionEventListener.EventDispatcher());
+      } else {
+        offlineLicenseHelper =
+            OfflineLicenseHelper.newWidevineInstance(
+                licenseUri.toString(),
+                httpDataSourceFactory,
+                new DrmSessionEventListener.EventDispatcher());
+      }
+
+      /* end ADDED */
+
       try {
         keySetId = offlineLicenseHelper.downloadLicense(format);
       } catch (DrmSession.DrmSessionException e) {
