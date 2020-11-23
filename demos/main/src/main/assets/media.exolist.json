@@ -4,9 +4,15 @@
     "samples": [
       {
         "name": "Tomorrowland2015 10s",
-        "uri": "https://origin.cluster.controlhub.dev.vualto.com/remote/wvtest/manifest.ism/manifest.mpd?mpd_inline_drm",
+        "uri": "https://origin.cluster.controlhub.dev.vualto.com/remote/wvtest/manifest.ism/manifest.mpd",
         "drm_scheme": "widevine",
-        "drm_license_uri": "https://widevine-license.vudrm.tech/proxy"
+        "drm_license_uri": "https://widevine-license.staging.vudrm.tech/proxy?token=vualto-demo%7c2020-11-23T21%3a24%3a49Z%7cEj3GRU8dDJmZ8%2bni1rcV4Hoo3rjQh7IJUldVUT%2bTY4U%3d%7c8022f7990c3a29dd2d2780d947ea7babd6738964"
+      },
+      {
+        "name": "Tomorrowland2015 10s - add token",
+        "uri": "https://origin.cluster.controlhub.dev.vualto.com/remote/wvtest/manifest.ism/manifesta.mpd",
+        "drm_scheme": "widevine",
+        "drm_license_uri": "https://widevine-license.staging.vudrm.tech/proxy"
       }
     ]
   },

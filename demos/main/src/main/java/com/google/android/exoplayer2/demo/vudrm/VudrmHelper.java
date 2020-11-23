@@ -2,7 +2,6 @@ package com.google.android.exoplayer2.demo.vudrm;
 
 import android.net.Uri;
 import android.os.Build;
-import androidx.annotation.Nullable;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.drm.DefaultDrmSessionManager;
 import com.google.android.exoplayer2.drm.DrmSessionManager;
@@ -15,25 +14,7 @@ import java.net.URI;
 import java.net.URL;
 
 public class VudrmHelper {
-  public static final String TOKEN = "";
-  public static final Boolean USE_SDK = false;
-  public static final String DEFAULT_VUDRM_WIDEVINE_LICENSE_URL = "https://widevine-license.vudrm.tech/proxy";
-  public static final String VUDRM_TECH = "vudrm.tech";
-  public static final String DRM_TECHNOLOGY = "drm.technology";
-
-  // Returns a Widevine VUDRM license URI that includes the token in a query string param
-  public static Uri buildVudrmLicenseUri(@Nullable Uri uri) throws Exception {
-    if (uri == null) {
-      uri = Uri.parse(DEFAULT_VUDRM_WIDEVINE_LICENSE_URL);
-    }
-
-    String tokenParam =  "token=" + java.net.URLEncoder.encode(TOKEN, "utf-8");
-
-    // from java uri to android uri
-    return Uri.parse(
-        new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(),tokenParam, uri.getFragment())
-            .toString());
-  }
+  public static final String TOKEN = "vualto-demo|2020-11-23T21:24:49Z|Ej3GRU8dDJmZ8+ni1rcV4Hoo3rjQh7IJUldVUT+TY4U=|8022f7990c3a29dd2d2780d947ea7babd6738964";
 
   // Builds and returns a DrmSessionManager with the VUDRM callback
   public static DrmSessionManager getVudrmSessionManager(String streamUri, String token)
@@ -57,9 +38,21 @@ public class VudrmHelper {
   }
 
   // Checks for vudrm.tech or drm.technology presence in the license URL
-  public static Boolean isVudrm(Uri uri) {
+  public static Boolean useSdk(Uri uri) {
+    String dns = uri.getAuthority();
+    String q = uri.getQuery();
+
+    if (q == null) {
+      return true;
+    }
+
+    return !q.contains("token=") && isVudrm(uri);
+  }
+
+  // Checks for vudrm.tech or drm.technology presence in the license URL
+  private static Boolean isVudrm(Uri uri) {
     String dns = uri.getAuthority();
     assert dns != null;
-    return dns.contains(VUDRM_TECH) || dns.contains(DRM_TECHNOLOGY);
+    return dns.contains("vudrm.tech") || dns.contains("drm.technology");
   }
 }

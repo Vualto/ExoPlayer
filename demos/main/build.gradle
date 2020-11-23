@@ -25,7 +25,7 @@ android {
     defaultConfig {
         versionName project.ext.releaseVersion
         versionCode project.ext.releaseVersionCode
-        minSdkVersion project.ext.minSdkVersion
+        minSdkVersion 19
         targetSdkVersion project.ext.appTargetSdkVersion
         multiDexEnabled true
     }

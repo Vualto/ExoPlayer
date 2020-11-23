@@ -17,6 +17,7 @@ package com.google.android.exoplayer2.demo;
 
 import static com.google.android.exoplayer2.util.Assertions.checkNotNull;
 import static com.google.android.exoplayer2.util.Assertions.checkStateNotNull;
+import static java.sql.DriverManager.println;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -225,30 +226,24 @@ public class DownloadTracker {
         return;
       }
 
-      Uri licenseUri = mediaItem.playbackProperties.drmConfiguration.licenseUri;
-
-      if ( VudrmHelper.isVudrm(licenseUri) ) {
+      if ( VudrmHelper.useSdk(mediaItem.playbackProperties.drmConfiguration.licenseUri) ) {
         try {
-          if (VudrmHelper.USE_SDK) {
-            // example using VUALTO Widevine SDK
-            DrmSessionManager drmSessionManager = VudrmHelper.getVudrmSessionManager(
-                mediaItem.playbackProperties.uri.toString(), /* should per asset */ VudrmHelper.TOKEN);
+          // example using VUALTO Widevine SDK
+          DrmSessionManager drmSessionManager = VudrmHelper.getVudrmSessionManager(
+              mediaItem.playbackProperties.uri.toString(), /* should per asset */ VudrmHelper.TOKEN);
 
-            new WidevineOfflineLicenseFetchTask(
-                format,
-                httpDataSourceFactory,
-                /* dialogHelper= */ this,
-                helper,
-                drmSessionManager).execute();
-            return;
-          }
-
-          // else leverage to ExoPlayer DEMO Implementation
-          licenseUri = VudrmHelper.buildVudrmLicenseUri(licenseUri);
+          new WidevineOfflineLicenseFetchTask(
+              format,
+              httpDataSourceFactory,
+              /* dialogHelper= */ this,
+              helper,
+              drmSessionManager).execute();
+          return;
         } catch (Exception e) {
           Toast.makeText(context, "error setting VUDRM callbacks" + e.getMessage(), Toast.LENGTH_LONG).show();
         }
       }
+
       new WidevineOfflineLicenseFetchTask(
           format,
           mediaItem.playbackProperties.drmConfiguration.licenseUri,
