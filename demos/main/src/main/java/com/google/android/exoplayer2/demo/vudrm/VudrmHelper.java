@@ -14,8 +14,10 @@ import com.vualto.vudrm.HttpKidSource;
 import com.vualto.vudrm.widevine.AssetConfiguration;
 import com.vualto.vudrm.widevine.WidevineCallback;
 import java.net.URL;
+import java.util.HashMap;
 
 public class VudrmHelper {
+  // Static token for testing purposes only
   public static final String TOKEN = "vualto-demo|2020-11-24T10:22:18Z|Ej3GRU8dDJmZ8+ni1rcV4Hoo3rjQh7IJUldVUT+TY4U=|a9ab289cd51ffd8145cf40a4800d690a9bab34bf";
 
   // Builds and returns a DrmSessionManager with the VUDRM callback
@@ -39,9 +41,17 @@ public class VudrmHelper {
     throw new Exception("unsupported android build version");
   }
 
-  // Checks for vudrm.tech or drm.technology presence in the license URL
+  // Returns a VUDRM token valid for the given asset
+  public static String getTokenFor(String assetId) {
+    // Dummy method, assets should have individual tokens
+    return TOKEN;
+  }
+
+  // Checks for vudrm.tech or drm.technology presence in the license URL and internet connection
   public static Boolean useSdk(Context context, Uri uri) {
-    return !uri.toString().contains("token=") && isVudrm(uri) && isNetworkAvailable(context);
+    return isVudrm(uri) &&
+        // Let exoPlayer demo handle loading downloaded licenses when offline
+        isNetworkAvailable(context);
   }
 
   // Checks for vudrm.tech or drm.technology presence in the license URL

@@ -3,13 +3,13 @@
     "name": "Vualto",
     "samples": [
       {
-        "name": "Tomorrowland2015 10s",
+        "name": "VUDRM Example 1",
         "uri": "https://origin.cluster.controlhub.dev.vualto.com/remote/wvtest/manifest.ism/asset1.mpd",
         "drm_scheme": "widevine",
-        "drm_license_uri": "https://widevine-license.vudrm.tech/proxy?token=vualto-demo%7c2020-11-24T10%3a22%3a18Z%7cEj3GRU8dDJmZ8%2bni1rcV4Hoo3rjQh7IJUldVUT%2bTY4U%3d%7ca9ab289cd51ffd8145cf40a4800d690a9bab34bf"
+        "drm_license_uri": "https://widevine-license.vudrm.tech/proxy"
       },
       {
-        "name": "Tomorrowland2015 10s - add token",
+        "name": "VUDRM Example 2",
         "uri": "https://origin.cluster.controlhub.dev.vualto.com/remote/wvtest/manifest.ism/asset2.mpd",
         "drm_scheme": "widevine",
         "drm_license_uri": "https://widevine-license.vudrm.tech/proxy"

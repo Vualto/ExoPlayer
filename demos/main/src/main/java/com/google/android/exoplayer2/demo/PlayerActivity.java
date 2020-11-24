@@ -296,17 +296,27 @@ public class PlayerActivity extends AppCompatActivity
               .setAdsLoaderProvider(this::getAdsLoader)
               .setAdViewProvider(playerView);
 
-      if (VudrmHelper.useSdk(this, mediaItems.get(0).playbackProperties.drmConfiguration.licenseUri)) {
-        try {
-          Toast.makeText(getApplicationContext(), "setting up VUDRM using SDK", Toast.LENGTH_LONG).show();
-          DrmSessionManager drmSessionManager = VudrmHelper.getVudrmSessionManager(
-              mediaItems.get(0).playbackProperties.uri.toString(), VudrmHelper.TOKEN);
-          mediaSourceFactory.setDrmSessionManager(drmSessionManager);
-        } catch (Exception e) {
-          Toast.makeText(getApplicationContext(), "error setting VUDRM", Toast.LENGTH_LONG).show();
-          e.printStackTrace();
+      /* ADDED (vudrm example) */
+
+      // Check if asset requires a VUDRM DrmSessionManager
+      if (mediaItems.get(0).playbackProperties.drmConfiguration != null) {
+        if (VudrmHelper.useSdk(this, mediaItems.get(0).playbackProperties.drmConfiguration.licenseUri)) {
+          try {
+            Toast.makeText(getApplicationContext(), "setting up VUDRM using SDK", Toast.LENGTH_LONG).show();
+
+            String vudrmToken = VudrmHelper.getTokenFor(mediaItems.get(0).mediaId);
+            DrmSessionManager drmSessionManager = VudrmHelper.getVudrmSessionManager(
+                mediaItems.get(0).playbackProperties.uri.toString(), vudrmToken);
+            mediaSourceFactory.setDrmSessionManager(drmSessionManager);
+
+          } catch (Exception e) {
+            Toast.makeText(getApplicationContext(), "error setting VUDRM", Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+          }
         }
       }
+
+      /* end ADDED */
 
       trackSelector = new DefaultTrackSelector(/* context= */ this);
       trackSelector.setParameters(trackSelectorParameters);
