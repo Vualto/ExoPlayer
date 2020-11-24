@@ -1,5 +1,22 @@
 [
   {
+    "name": "Vualto",
+    "samples": [
+      {
+        "name": "VUDRM Example 1",
+        "uri": "https://origin.cluster.controlhub.dev.vualto.com/remote/wvtest/manifest.ism/asset1.mpd",
+        "drm_scheme": "widevine",
+        "drm_license_uri": "https://widevine-license.vudrm.tech/proxy"
+      },
+      {
+        "name": "VUDRM Example 2",
+        "uri": "https://origin.cluster.controlhub.dev.vualto.com/remote/wvtest/manifest.ism/asset2.mpd",
+        "drm_scheme": "widevine",
+        "drm_license_uri": "https://widevine-license.vudrm.tech/proxy"
+      }
+    ]
+  },
+  {
     "name": "YouTube DASH",
     "samples": [
       {
