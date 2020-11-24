@@ -226,7 +226,8 @@ public class DownloadTracker {
         return;
       }
 
-      if ( VudrmHelper.useSdk(mediaItem.playbackProperties.drmConfiguration.licenseUri) ) {
+      if ( VudrmHelper.useSdk(context, mediaItem.playbackProperties.drmConfiguration.licenseUri) ) {
+        Toast.makeText(context, "setting up VUDRM using SDK", Toast.LENGTH_LONG).show();
         try {
           // example using VUALTO Widevine SDK
           DrmSessionManager drmSessionManager = VudrmHelper.getVudrmSessionManager(

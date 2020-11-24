@@ -1,5 +1,8 @@
 package com.google.android.exoplayer2.demo.vudrm;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import com.google.android.exoplayer2.C;
@@ -10,11 +13,10 @@ import com.google.android.exoplayer2.drm.MediaDrmCallback;
 import com.vualto.vudrm.HttpKidSource;
 import com.vualto.vudrm.widevine.AssetConfiguration;
 import com.vualto.vudrm.widevine.WidevineCallback;
-import java.net.URI;
 import java.net.URL;
 
 public class VudrmHelper {
-  public static final String TOKEN = "vualto-demo|2020-11-23T21:24:49Z|Ej3GRU8dDJmZ8+ni1rcV4Hoo3rjQh7IJUldVUT+TY4U=|8022f7990c3a29dd2d2780d947ea7babd6738964";
+  public static final String TOKEN = "vualto-demo|2020-11-24T10:22:18Z|Ej3GRU8dDJmZ8+ni1rcV4Hoo3rjQh7IJUldVUT+TY4U=|a9ab289cd51ffd8145cf40a4800d690a9bab34bf";
 
   // Builds and returns a DrmSessionManager with the VUDRM callback
   public static DrmSessionManager getVudrmSessionManager(String streamUri, String token)
@@ -38,14 +40,8 @@ public class VudrmHelper {
   }
 
   // Checks for vudrm.tech or drm.technology presence in the license URL
-  public static Boolean useSdk(Uri uri) {
-    String q = uri.getQuery();
-
-    if (q == null) {
-      return true;
-    }
-
-    return !q.contains("token=") && isVudrm(uri);
+  public static Boolean useSdk(Context context, Uri uri) {
+    return !uri.toString().contains("token=") && isVudrm(uri) && isNetworkAvailable(context);
   }
 
   // Checks for vudrm.tech or drm.technology presence in the license URL
@@ -54,4 +50,12 @@ public class VudrmHelper {
     assert dns != null;
     return dns.contains("vudrm.tech") || dns.contains("drm.technology");
   }
+
+  private static boolean isNetworkAvailable(Context context) {
+    ConnectivityManager connectivityManager
+        = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+    return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+  }
+
 }

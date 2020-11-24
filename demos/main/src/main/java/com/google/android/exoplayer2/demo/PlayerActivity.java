@@ -17,8 +17,11 @@ package com.google.android.exoplayer2.demo;
 
 import static com.google.android.exoplayer2.util.Assertions.checkNotNull;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Pair;
@@ -40,6 +43,8 @@ import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.RenderersFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.audio.AudioAttributes;
+import com.google.android.exoplayer2.demo.vudrm.VudrmHelper;
+import com.google.android.exoplayer2.drm.DrmSessionManager;
 import com.google.android.exoplayer2.drm.FrameworkMediaDrm;
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader;
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer.DecoderInitializationException;
@@ -290,6 +295,18 @@ public class PlayerActivity extends AppCompatActivity
           new DefaultMediaSourceFactory(dataSourceFactory)
               .setAdsLoaderProvider(this::getAdsLoader)
               .setAdViewProvider(playerView);
+
+      if (VudrmHelper.useSdk(this, mediaItems.get(0).playbackProperties.drmConfiguration.licenseUri)) {
+        try {
+          Toast.makeText(getApplicationContext(), "setting up VUDRM using SDK", Toast.LENGTH_LONG).show();
+          DrmSessionManager drmSessionManager = VudrmHelper.getVudrmSessionManager(
+              mediaItems.get(0).playbackProperties.uri.toString(), VudrmHelper.TOKEN);
+          mediaSourceFactory.setDrmSessionManager(drmSessionManager);
+        } catch (Exception e) {
+          Toast.makeText(getApplicationContext(), "error setting VUDRM", Toast.LENGTH_LONG).show();
+          e.printStackTrace();
+        }
+      }
 
       trackSelector = new DefaultTrackSelector(/* context= */ this);
       trackSelector.setParameters(trackSelectorParameters);

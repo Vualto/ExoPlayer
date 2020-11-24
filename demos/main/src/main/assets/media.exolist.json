@@ -4,15 +4,15 @@
     "samples": [
       {
         "name": "Tomorrowland2015 10s",
-        "uri": "https://origin.cluster.controlhub.dev.vualto.com/remote/wvtest/manifest.ism/manifest.mpd",
+        "uri": "https://origin.cluster.controlhub.dev.vualto.com/remote/wvtest/manifest.ism/asset1.mpd",
         "drm_scheme": "widevine",
-        "drm_license_uri": "https://widevine-license.staging.vudrm.tech/proxy?token=vualto-demo%7c2020-11-23T21%3a24%3a49Z%7cEj3GRU8dDJmZ8%2bni1rcV4Hoo3rjQh7IJUldVUT%2bTY4U%3d%7c8022f7990c3a29dd2d2780d947ea7babd6738964"
+        "drm_license_uri": "https://widevine-license.vudrm.tech/proxy?token=vualto-demo%7c2020-11-24T10%3a22%3a18Z%7cEj3GRU8dDJmZ8%2bni1rcV4Hoo3rjQh7IJUldVUT%2bTY4U%3d%7ca9ab289cd51ffd8145cf40a4800d690a9bab34bf"
       },
       {
         "name": "Tomorrowland2015 10s - add token",
-        "uri": "https://origin.cluster.controlhub.dev.vualto.com/remote/wvtest/manifest.ism/manifesta.mpd",
+        "uri": "https://origin.cluster.controlhub.dev.vualto.com/remote/wvtest/manifest.ism/asset2.mpd",
         "drm_scheme": "widevine",
-        "drm_license_uri": "https://widevine-license.staging.vudrm.tech/proxy"
+        "drm_license_uri": "https://widevine-license.vudrm.tech/proxy"
       }
     ]
   },
