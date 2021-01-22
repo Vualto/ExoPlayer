@@ -18,7 +18,7 @@ import java.util.HashMap;
 
 public class VudrmHelper {
   // Static token for testing purposes only
-  public static final String TOKEN = "vualto-demo|2020-11-24T10:22:18Z|Ej3GRU8dDJmZ8+ni1rcV4Hoo3rjQh7IJUldVUT+TY4U=|a9ab289cd51ffd8145cf40a4800d690a9bab34bf";
+  public static final String TOKEN = "vualto-demo|2021-01-08T14:45:39Z|Qxm2il1qufWoGMSb/JR7BGrI/Ssm2tVnCaho1GYD9tQ=|24d1dfd5ad968b58ed36fc688ecb1af2e88c6720";
 
   // Builds and returns a DrmSessionManager with the VUDRM callback
   public static DrmSessionManager getVudrmSessionManager(String streamUri, String token)
@@ -56,9 +56,10 @@ public class VudrmHelper {
 
   // Checks for vudrm.tech or drm.technology presence in the license URL
   private static Boolean isVudrm(Uri uri) {
-    String dns = uri.getAuthority();
-    assert dns != null;
-    return dns.contains("vudrm.tech") || dns.contains("drm.technology");
+    return false ;
+//    String dns = uri.getAuthority();
+//    assert dns != null;
+//    return dns.contains("vudrm.tech") || dns.contains("drm.technology") ;
   }
 
   private static boolean isNetworkAvailable(Context context) {
