@@ -570,7 +570,7 @@ public class SampleChooserActivity extends AppCompatActivity
     @Override
     public void onClick(View view) {
       PlaylistHolder playlistHolder = (PlaylistHolder) view.getTag();
-      if (playlistHolder.isRenew) {
+      if (playlistHolder.isRenewLicenseButton) {
         onSampleRenewButtonClicked(playlistHolder);
       } else {
         onSampleDownloadButtonClicked(playlistHolder);
@@ -601,19 +601,19 @@ public class SampleChooserActivity extends AppCompatActivity
 
     public final String title;
     public final List<MediaItem> mediaItems;
-    public final boolean isRenew;
+    public final boolean isRenewLicenseButton;
 
     private PlaylistHolder(String title, List<MediaItem> mediaItems) {
       checkArgument(!mediaItems.isEmpty());
       this.title = title;
       this.mediaItems = Collections.unmodifiableList(new ArrayList<>(mediaItems));
-      this.isRenew = false;
+      this.isRenewLicenseButton = false;
     }
 
     private PlaylistHolder(PlaylistHolder base, boolean isRenew) {
       this.title = base.title;
       this.mediaItems = base.mediaItems;
-      this.isRenew = isRenew;
+      this.isRenewLicenseButton = isRenew;
     }
   }
 
