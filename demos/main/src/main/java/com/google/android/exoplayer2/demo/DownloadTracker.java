@@ -21,6 +21,7 @@ import static java.sql.DriverManager.println;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.widget.Toast;
@@ -69,6 +70,7 @@ public class DownloadTracker {
   }
 
   private static final String TAG = "DownloadTracker";
+  private static final String KEY_IDS_SHARED_PREFS = "com.vualto.vudrm.demo.StoredKeyIds";
 
   private final Context context;
   private final HttpDataSource.Factory httpDataSourceFactory;
@@ -119,6 +121,7 @@ public class DownloadTracker {
     if (download != null) {
       DownloadService.sendRemoveDownload(
           context, DemoDownloadService.class, download.request.id, /* foreground= */ false);
+      VudrmHelper.removeKeySetId(context.getSharedPreferences(KEY_IDS_SHARED_PREFS, 0), mediaItem.mediaId);
     } else {
       if (startDownloadDialogHelper != null) {
         startDownloadDialogHelper.release();
@@ -129,6 +132,27 @@ public class DownloadTracker {
               DownloadHelper.forMediaItem(
                   context, mediaItem, renderersFactory, httpDataSourceFactory),
               mediaItem);
+    }
+  }
+
+  public void renewLicense(
+      FragmentManager fragmentManager, MediaItem mediaItem, RenderersFactory renderersFactory) {
+    Download download = downloads.get(checkNotNull(mediaItem.playbackProperties).uri);
+    if (download == null) {
+      Log.e(TAG, "download not found");
+    } else {
+      if (startDownloadDialogHelper != null) {
+        startDownloadDialogHelper.release();
+      }
+      byte[] renewKeySetId = VudrmHelper.getKeySetId(
+          context.getSharedPreferences(KEY_IDS_SHARED_PREFS, 0), mediaItem.mediaId);
+
+      startDownloadDialogHelper =
+          new StartDownloadDialogHelper(
+              fragmentManager,
+              DownloadHelper.forMediaItem(
+                  context, mediaItem, renderersFactory, httpDataSourceFactory),
+              mediaItem, renewKeySetId);
     }
   }
 
@@ -179,12 +203,22 @@ public class DownloadTracker {
     private MappedTrackInfo mappedTrackInfo;
     private WidevineOfflineLicenseFetchTask widevineOfflineLicenseFetchTask;
     @Nullable private byte[] keySetId;
+    @Nullable private byte[] renewKeySetId;
 
     public StartDownloadDialogHelper(
         FragmentManager fragmentManager, DownloadHelper downloadHelper, MediaItem mediaItem) {
       this.fragmentManager = fragmentManager;
       this.downloadHelper = downloadHelper;
       this.mediaItem = mediaItem;
+      downloadHelper.prepare(this);
+    }
+
+    public StartDownloadDialogHelper(
+        FragmentManager fragmentManager, DownloadHelper downloadHelper, MediaItem mediaItem, byte[] renewKeySetId) {
+      this.fragmentManager = fragmentManager;
+      this.downloadHelper = downloadHelper;
+      this.mediaItem = mediaItem;
+      this.renewKeySetId = renewKeySetId;
       downloadHelper.prepare(this);
     }
 
@@ -238,7 +272,7 @@ public class DownloadTracker {
               httpDataSourceFactory,
               /* dialogHelper= */ this,
               helper,
-              drmSessionManager).execute();
+              drmSessionManager, this.renewKeySetId).execute();
           return;
         } catch (Exception e) {
           Toast.makeText(context, "error setting VUDRM callbacks" + e.getMessage(), Toast.LENGTH_LONG).show();
@@ -250,7 +284,7 @@ public class DownloadTracker {
           mediaItem.playbackProperties.drmConfiguration.licenseUri,
           httpDataSourceFactory,
           /* dialogHelper= */ this,
-          helper).execute();
+          helper, this.renewKeySetId).execute();
     }
 
     @Override
@@ -324,9 +358,26 @@ public class DownloadTracker {
       return null;
     }
 
-    private void onOfflineLicenseFetched(DownloadHelper helper, byte[] keySetId) {
+    private void onOfflineLicenseFetched(DownloadHelper helper, byte[] keySetId, String mediaId, boolean isDownload) {
       this.keySetId = keySetId;
-      onDownloadPrepared(helper);
+
+      /* ADDED (vudrm example) */
+
+      VudrmHelper.storeKeySetId(
+          context.getSharedPreferences(KEY_IDS_SHARED_PREFS, 0),
+          mediaId,
+          keySetId
+      );
+
+      /* end ADDED */
+
+      if (isDownload) {
+        onDownloadPrepared(helper);
+      } else {
+        Toast.makeText(context, "renewed license", Toast.LENGTH_SHORT)
+            .show();
+        Log.i(TAG, "renewed license");
+      }
     }
 
     private void onOfflineLicenseFetchedError(DrmSession.DrmSessionException e) {
@@ -412,18 +463,20 @@ public class DownloadTracker {
 
     @Nullable private DrmSessionManager drmSessionManager;
     @Nullable private Uri licenseUri;
+    @Nullable public byte[] renewKeySetId;
 
     public WidevineOfflineLicenseFetchTask(
         Format format,
         HttpDataSource.Factory httpDataSourceFactory,
         StartDownloadDialogHelper dialogHelper,
         DownloadHelper downloadHelper,
-        DrmSessionManager drmSessionManager) {
+        DrmSessionManager drmSessionManager, byte[] renewKeySetId) {
       this.format = format;
       this.httpDataSourceFactory = httpDataSourceFactory;
       this.dialogHelper = dialogHelper;
       this.downloadHelper = downloadHelper;
       this.drmSessionManager = drmSessionManager;
+      this.renewKeySetId = renewKeySetId;
     }
 
     /* end ADDED */
@@ -433,12 +486,13 @@ public class DownloadTracker {
         Uri licenseUri,
         HttpDataSource.Factory httpDataSourceFactory,
         StartDownloadDialogHelper dialogHelper,
-        DownloadHelper downloadHelper) {
+        DownloadHelper downloadHelper,  byte[] renewKeySetId) {
       this.format = format;
       this.licenseUri = licenseUri;
       this.httpDataSourceFactory = httpDataSourceFactory;
       this.dialogHelper = dialogHelper;
       this.downloadHelper = downloadHelper;
+      this.renewKeySetId = renewKeySetId;
     }
 
     @Override
@@ -472,7 +526,13 @@ public class DownloadTracker {
       /* end ADDED */
 
       try {
-        keySetId = offlineLicenseHelper.downloadLicense(format);
+        if (this.renewKeySetId == null) {
+          // no renewKeySetId found, assumes new licence download
+          keySetId = offlineLicenseHelper.downloadLicense(format);
+        } else {
+          // renewKeySetId found, assumes renew licence
+          keySetId = offlineLicenseHelper.renewLicense(renewKeySetId);
+        }
       } catch (DrmSession.DrmSessionException e) {
         drmSessionException = e;
       } finally {
@@ -486,7 +546,7 @@ public class DownloadTracker {
       if (drmSessionException != null) {
         dialogHelper.onOfflineLicenseFetchedError(drmSessionException);
       } else {
-        dialogHelper.onOfflineLicenseFetched(downloadHelper, checkStateNotNull(keySetId));
+        dialogHelper.onOfflineLicenseFetched(downloadHelper, checkStateNotNull(keySetId), dialogHelper.mediaItem.mediaId, this.renewKeySetId == null);
       }
     }
   }
