@@ -264,8 +264,9 @@ public class DownloadTracker {
         Toast.makeText(context, "setting up VUDRM using SDK", Toast.LENGTH_LONG).show();
         try {
           // example using VUALTO Widevine SDK
+          String vudrmToken = VudrmHelper.getTokenFor("mediaAssetId");
           DrmSessionManager drmSessionManager = VudrmHelper.getVudrmSessionManager(
-              mediaItem.playbackProperties.uri.toString(), /* should per asset */ VudrmHelper.TOKEN);
+              mediaItem.playbackProperties.uri.toString(), vudrmToken);
 
           new WidevineOfflineLicenseFetchTask(
               format,
