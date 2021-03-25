@@ -43,11 +43,13 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatImageView;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.MediaMetadata;
 import com.google.android.exoplayer2.ParserException;
 import com.google.android.exoplayer2.RenderersFactory;
+import com.google.android.exoplayer2.demo.vudrm.VudrmHelper;
 import com.google.android.exoplayer2.offline.DownloadService;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSourceInputStream;
@@ -230,6 +232,25 @@ public class SampleChooserActivity extends AppCompatActivity
     startActivity(intent);
     return true;
   }
+
+  /* ADDED (vudrm example) */
+
+  private void onSampleRenewButtonClicked(PlaylistHolder playlistHolder) {
+    if (!this.downloadTracker.isDownloaded(playlistHolder.mediaItems.get(0))) {
+      // TODO: handle
+    }
+
+    Toast.makeText(getApplicationContext(), "renew button clicked", Toast.LENGTH_LONG)
+        .show();
+
+    RenderersFactory renderersFactory =
+        DemoUtil.buildRenderersFactory(
+            /* context= */ this, isNonNullAndChecked(preferExtensionDecodersMenuItem));
+    downloadTracker.renewLicense(
+        getSupportFragmentManager(), playlistHolder.mediaItems.get(0), renderersFactory);
+  }
+
+  /* end ADDED */
 
   private void onSampleDownloadButtonClicked(PlaylistHolder playlistHolder) {
     int downloadUnsupportedStringId = getDownloadUnsupportedStringId(playlistHolder);
@@ -495,6 +516,9 @@ public class SampleChooserActivity extends AppCompatActivity
         View downloadButton = view.findViewById(R.id.download_button);
         downloadButton.setOnClickListener(this);
         downloadButton.setFocusable(false);
+        View renewButton = view.findViewById(R.id.renew_license);
+        renewButton.setOnClickListener(this);
+        renewButton.setFocusable(false);
       }
       initializeChildView(view, getChild(groupPosition, childPosition));
       return view;
@@ -545,7 +569,12 @@ public class SampleChooserActivity extends AppCompatActivity
 
     @Override
     public void onClick(View view) {
-      onSampleDownloadButtonClicked((PlaylistHolder) view.getTag());
+      PlaylistHolder playlistHolder = (PlaylistHolder) view.getTag();
+      if (playlistHolder.isRenewLicenseButton) {
+        onSampleRenewButtonClicked(playlistHolder);
+      } else {
+        onSampleDownloadButtonClicked(playlistHolder);
+      }
     }
 
     private void initializeChildView(View view, PlaylistHolder playlistHolder) {
@@ -562,6 +591,9 @@ public class SampleChooserActivity extends AppCompatActivity
           canDownload ? (isDownloaded ? 0xFF42A5F5 : 0xFFBDBDBD) : 0xFF666666);
       downloadButton.setImageResource(
           isDownloaded ? R.drawable.ic_download_done : R.drawable.ic_download);
+      AppCompatImageView renewButton = view.findViewById(R.id.renew_license);
+      renewButton.setColorFilter(isDownloaded ? 0xFFBDBDBD : 0xFF42A5F5);
+      renewButton.setTag(new PlaylistHolder(playlistHolder, true));
     }
   }
 
@@ -569,11 +601,19 @@ public class SampleChooserActivity extends AppCompatActivity
 
     public final String title;
     public final List<MediaItem> mediaItems;
+    public final boolean isRenewLicenseButton;
 
     private PlaylistHolder(String title, List<MediaItem> mediaItems) {
       checkArgument(!mediaItems.isEmpty());
       this.title = title;
       this.mediaItems = Collections.unmodifiableList(new ArrayList<>(mediaItems));
+      this.isRenewLicenseButton = false;
+    }
+
+    private PlaylistHolder(PlaylistHolder base, boolean isRenew) {
+      this.title = base.title;
+      this.mediaItems = base.mediaItems;
+      this.isRenewLicenseButton = isRenew;
     }
   }
 

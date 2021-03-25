@@ -4,13 +4,7 @@
     "samples": [
       {
         "name": "VUDRM Example 1",
-        "uri": "https://origin.cluster.controlhub.dev.vualto.com/remote/wvtest/manifest.ism/asset1.mpd",
-        "drm_scheme": "widevine",
-        "drm_license_uri": "https://widevine-license.vudrm.tech/proxy"
-      },
-      {
-        "name": "VUDRM Example 2",
-        "uri": "https://origin.cluster.controlhub.dev.vualto.com/remote/wvtest/manifest.ism/asset2.mpd",
+        "uri": "https://d1chyo78gdexn4.cloudfront.net/vualto-demo/tomorrowland2015/tomorrowland2015_inline.ism/manifest.mpd?vend=1970-01-01T00:00:10Z",
         "drm_scheme": "widevine",
         "drm_license_uri": "https://widevine-license.vudrm.tech/proxy"
       }

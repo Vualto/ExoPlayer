@@ -23,6 +23,9 @@ android {
     }
 
     defaultConfig {
+        vectorDrawables {
+            useSupportLibrary = true
+        }
         versionName project.ext.releaseVersion
         versionCode project.ext.releaseVersionCode
         minSdkVersion 19
